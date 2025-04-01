@@ -5,3 +5,4 @@ The frontend is built with HTML, CSS, JavaScript and Thymeleaf. The backend is i
 
 The application uses the RAWG API which provides detailed information about video games. Users can search for games using keywords, and the application fetches game-related metadata such as title, genre, platforms, Metacritic score, release date and more.
 
+A project for the Faculty of Automatic Control and Computers, University Politehnica of Bucharest.
