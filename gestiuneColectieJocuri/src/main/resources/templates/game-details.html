@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Details</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="/scripts.js"></script>
+</head>
+<body>
+<div th:replace="~{fragments/header.html}"></div>
+
+<!-- Sectiunea detaliilor jocului -->
+<section class="game-details-section">
+    <!-- Container pentru imaginea jocului -->
+    <div class="game-image-container">
+        <img th:src="${game.image}" alt="Game Image" class="game-photo">
+    </div>
+    <!-- Container pentru informatii despre joc luate folosind RAWG API -->
+    <div class="game-info-container">
+        <!-- Informatii generale despre joc -->
+        <p><strong>Game Title:</strong> <span th:text="${game.title != null ? game.title : 'N/A'}">Game Title</span></p>
+        <p><strong>Genre:</strong> <span th:text="${game.genre != null ? game.genre : 'N/A'}">Genre</span></p>
+        <p><strong>Tags:</strong> <span th:text="${game.tags != null ? game.tags : 'N/A'}">Tags</span></p>
+        <p><strong>Release Year:</strong> <span th:text="${game.releaseYear != null ? game.releaseYear : 'N/A'}">Release Year</span></p>
+        <p><strong>To Be Announced:</strong> <span th:text="${game.tba != null ? game.tba : false}">TBA</span></p>
+        <p><strong>Last Update Date:</strong> <span th:text="${game.lastUpdateDate != null ? game.lastUpdateDate : 'N/A'}">Last Update Date</span></p>
+        <p><strong>ESRB Rating:</strong> <span th:text="${game.esrbRating != null ? game.esrbRating : 'N/A'}">ESRB Rating</span></p>
+        <p><strong>Platforms:</strong> <span th:text="${game.platforms != null ? game.platforms : 'N/A'}">Platforms</span></p>
+        <p><strong>Stores:</strong><span th:text="${game.stores != null && !game.stores.isEmpty() ? game.stores : 'N/A'}">Stores</span></p>
+        <p><strong>Achievements Count:</strong> <span th:text="${game.achievementsCount != null ? game.achievementsCount : 0}">Achievements Count</span></p>
+        <p><strong>Description:</strong> <span th:text="${game.description != null ? game.description : 'N/A'}">Description</span></p>
+        <p><strong>Developers:</strong> <span th:text="${game.developers != null ? game.developers : 'N/A'}">Developers</span></p>
+        <p><strong>Publishers:</strong> <span th:text="${game.publishers != null ? game.publishers : 'N/A'}">Publishers</span></p>
+        <p><strong>Metacritic Score:</strong> <span th:text="${game.metacriticScore != null && game.metacriticScore > 0 ? game.metacriticScore : 'N/A'}">Metacritic Score</span></p>
+        <!-- Link catre URL-ul Metacritic daca are-->
+        <p>
+            <strong>Metacritic URL:</strong>
+            <a th:if="${game.metacriticURL != null and game.metacriticURL != 'N/A'}"
+               th:href="${game.metacriticURL}" target="_blank">Visit</a>
+            <span th:if="${game.metacriticURL == null or game.metacriticURL == 'N/A'}">N/A</span>
+        </p>
+        <!-- Link catre website-ul jocului daca are -->
+        <p>
+            <strong>Website:</strong>
+            <a th:if="${game.website != null and game.website != 'N/A'}"
+               th:href="${game.website}" target="_blank">Website</a>
+            <span th:if="${game.website == null or game.website == 'N/A'}">N/A</span>
+        </p>
+        <p><strong>PC Requirements:</strong>
+        <pre class="pc-requirements" th:text="${game.PCrequirements != null ? game.PCrequirements : 'N/A'}">PC Requirements</pre>
+        </p>
+    </div>
+    <!-- Sectiune pentru interactiunea utilizatorului daca acesta este logat -->
+    <div th:if="${isLoggedIn}">
+        <!-- Informatii personalizate pentru jocul utilizatorului -->
+        <div th:if="${userHasGame}" class="user-game-container" th:attr="data-id=${userGame.id}">
+            <p><strong>Preferred Store:</strong>
+                <span th:if="${userGame.availableStores != null && userGame.availableStores.size() > 1}">
+                <select class="editable-input">
+                    <option value="N/A" th:if="${userGame.stores == null || userGame.stores.equals('N/A')}" selected>
+                        Not Selected
+                    </option>
+                    <option th:each="store : ${userGame.availableStores}"
+                            th:value="${store}"
+                            th:text="${store}"
+                            th:selected="${store.trim().equals(userGame.stores.trim())}"></option>
+                </select>
+                </span>
+                <span th:if="${userGame.availableStores != null && userGame.availableStores.size() == 1 && userGame.availableStores[0].trim() != ''}">
+                                <span th:text="${userGame.availableStores[0]}"></span>
+                </span>
+                <span th:if="${userGame.availableStores == null || userGame.availableStores.isEmpty() || userGame.availableStores[0].trim() == ''}">
+                    No stores found.
+                </span>
+            </p>
+
+            <p><strong>Hours Played:</strong>
+                <input type="number" th:value="${userGame.hoursPlayed != null ? userGame.hoursPlayed : 0}" class="editable-input">
+            </p>
+            <p><strong>Personal Rating:</strong>
+                <input type="number" th:value="${userGame.personalRating != null ? userGame.personalRating : 0}" class="editable-input" min="1" max="10">
+            </p>
+            <p><strong>Review:</strong>
+                <textarea class="editable-textarea" th:text="${userGame.review != null ? userGame.review : 'N/A'}"></textarea>
+            </p>
+            <p class="favorite-row">
+                <strong>Favorite:</strong>
+                <img th:src="${userGame.favorite ? '/photos/filled-star.png' : '/photos/empty-star.png'}"
+                     th:attr="data-id=${userGame.id}"
+                     class="favorite-icon2"
+                     style="width: 35px; height: 35px;"
+                     onclick="toggleFavoriteGameDetails(this)"
+                     alt="Favorite Icon">
+            </p>
+            <p><strong>Completion Status:</strong>
+                <select th:value="${userGame.completionStatus != null ? userGame.completionStatus : 'Not Started'}">
+                    <option value="Not Started" th:selected="${userGame.completionStatus == 'Not Started'}">Not
+                        Started
+                    </option>
+                    <option value="In Progress" th:selected="${userGame.completionStatus == 'In Progress'}">In
+                        Progress
+                    </option>
+                    <option value="Completed" th:selected="${userGame.completionStatus == 'Completed'}">Completed
+                    </option>
+                </select>
+            </p>
+            <!-- AchievementsEarned care apare doar daca jocul are AchievementsCount mai mare de 0  -->
+            <p th:if="${game.achievementsCount != null && game.achievementsCount > 0}">
+                <strong>Achievements Earned:</strong>
+                <input type="number" th:value="${userGame.userAchievementsCount != null ? userGame.userAchievementsCount : 0}"
+                       class="editable-input" min="0">
+            </p>
+            <button type="button" class="save-btn2" onclick="saveUserGame()">Save Changes</button>
+        </div>
+
+        <!-- Buton pentru stergerea jocului din colectie care apare doar daca userul are jocul in colectie-->
+        <div th:if="${userHasGame}" class="remove-game-container">
+            <button
+                    class="remove-game-btn"
+                    th:data-title="${game.title}"
+                    th:data-id="${userGame.id}"
+                    onclick="handleDeleteClick(this)">
+                Remove Game From Your Collection
+            </button>
+        </div>
+
+        <!-- Buton pentru adaugarea jocului in colectie daca nu exista -->
+        <div th:if="${!userHasGame}" class="add-game-container">
+            <button
+                    class="add-game-btn"
+                    th:data-id="${game.id}"
+                    th:data-title="${game.title}"
+                    onclick="handleAddGame(this)">
+                Add Game to Your Collection
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal pentru confirmarea stergerii -->
+    <div id="deleteModal" class="modal" data-id="">
+        <div class="modal-content">
+            <h2 id="deleteModalTitle">Delete Game</h2>
+            <p id="deleteModalMessage">Are you sure you want to remove this game from your collection?</p>
+            <div class="modal-buttons">
+                <button id="confirmDeleteBtn" class="confirm-btn">Yes</button>
+                <button id="cancelDeleteBtn" class="cancel-btn">No</button>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+</body>
+</html>

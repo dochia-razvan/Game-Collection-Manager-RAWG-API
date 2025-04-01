@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<header class="fixed-header"> <!-- Header-ul fix, vizibil mereu in partea de sus a paginii -->
+    <a href="/" class="logo-link">
+        <img src="/photos/logo.png" alt="Logo" class="header-logo">
+    </a>
+
+    <!-- Butoane de navigare -->
+    <div class="nav-buttons">
+        <a href="/games" class="nav-button your-collection">Your Collection</a>
+        <a href="/other-page" class="nav-button">Another Button</a>
+    </div>
+
+    <!-- Bara de cautare -->
+    <div class="search-bar">
+        <input type="text" name="query" id="searchInput" placeholder="Search games..." oninput="liveSearchGames()" autocomplete="off"/>
+        <div id="searchResultsContainer" class="search-results-container"></div>
+    </div>
+
+    <!-- Sectiunea din dreapta a header-ului -->
+    <div class="header-right">
+        <button th:if="${isLoggedIn}" id="signOutBtn" class="sign-out-btn">Sign Out</button>
+        <!-- Buton pentru delogare, vizibil doar daca utilizatorul este autentificat -->
+    </div>
+</header>
+
+    <!-- Popup pentru mesaje scurte -->
+    <div id="popupContainer" class="popup hidden">
+        <span class="close-popup" id="popupClose">&times;</span>
+        <p id="popupMessage"></p>
+    </div>
+
+<!-- Modal pentru confirmarea delogarii -->
+<div id="signOutModal" class="modal">
+    <div class="modal-content">
+        <h2>Are you sure you want to sign out?</h2>
+        <p id="signOutWarning" class="warning-message" style="color: red; display: none;">You will be redirected to the home page.</p>
+        <div class="modal-buttons">
+            <button id="confirmSignOut" class="confirm-btn">Yes</button>
+            <button id="cancelSignOut" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
