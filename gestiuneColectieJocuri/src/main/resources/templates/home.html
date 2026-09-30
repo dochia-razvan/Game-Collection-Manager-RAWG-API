@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- Declararea documentului HTML si includerea namespace-ului pentru Thymeleaf -->
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="/scripts.js"></script>
+</head>
+<body>
+
+<!-- Includerea unui fragment (header) folosind Thymeleaf -->
+<div th:replace="~{fragments/header.html}"></div>
+
+<!-- Popup pentru succesul inregistrarii -->
+<div id="successPopup" class="success-popup" th:if="${signupSuccess}">
+    <!-- Buton pentru inchiderea popup-ului -->
+    <span id="closePopup" class="close-popup">&times;</span>
+    <!-- Mesajul de succes preluat din modelul Thymeleaf -->
+    <p th:text="${signupSuccess}"></p>
+</div>
+
+<!-- Sectiunea principala pentru autentificare -->
+<section class="home-section">
+    <div class="auth-buttons">
+        <!-- Afisarea butonului "Log In" doar daca utilizatorul nu este autentificat -->
+        <button th:if="${!isLoggedIn}" id="loginBtn">Log In</button>
+        <!-- Afisarea butonului "Sign Up" doar daca utilizatorul nu este autentificat -->
+        <button th:if="${!isLoggedIn}" id="signupBtn">Sign Up</button>
+    </div>
+</section>
+
+<!-- Modal pentru autentificare -->
+<div id="loginModal" class="modal" th:classappend="${showLoginModal} ? 'show' : ''">
+    <div class="modal-content">
+        <!-- Buton pentru inchiderea modalului -->
+        <span class="close" id="closeLogin">&times;</span>
+        <h2>Log In</h2> <!-- Titlul modalului -->
+
+        <!-- Afisarea unui mesaj de eroare daca exista -->
+        <div th:if="${loginError}" class="error">
+            <p th:text="${loginError}" style="color: red;"></p>
+        </div>
+
+        <!-- Formularul de autentificare -->
+        <form action="/login" method="post">
+            <div>
+                <!-- Input pentru username sau email -->
+                <label for="username">Username/Email:</label>
+                <input type="text" id="username" name="username" th:value="${loginInput}">
+            </div>
+            <div>
+                <!-- Input pentru parola -->
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <!-- Buton pentru trimiterea formularului -->
+            <button type="submit">Log In</button>
+            <!-- Mesaj care ofera optiunea de inregistrare daca utilizatorul nu are cont -->
+            <p class="signup-prompt">
+                or<a id="openSignupLink" href="#" onclick="openSignup()">Sign Up</a>if you don't have an account
+            </p>
+        </form>
+    </div>
+</div>
+
+<!-- Modal pentru inregistrare -->
+<div id="signupModal" class="modal" th:classappend="${showSignupModal} ? 'show' : ''">
+    <div class="modal-content">
+        <!-- Buton pentru inchiderea modalului -->
+        <span class="close" id="closeSignup">&times;</span>
+        <h2>Sign Up</h2> <!-- Titlul modalului -->
+
+        <!-- Afisarea unui mesaj de eroare daca exista -->
+        <div th:if="${signupError}" class="error">
+            <p th:text="${signupError}" style="color: red;"></p>
+        </div>
+        <!-- Afisarea unui mesaj de succes daca inregistrarea a reusit -->
+        <div th:if="${signupSuccess}" class="success">
+            <p th:text="${signupSuccess}" style="color: green;"></p>
+        </div>
+
+        <!-- Formularul de inregistrare -->
+        <form action="/signup" method="post">
+            <div>
+                <!-- Input pentru username -->
+                <label for="newUsername">Username:</label>
+                <input type="text" id="newUsername" name="username" th:value="${signupInput?.username}">
+            </div>
+            <div>
+                <!-- Input pentru email -->
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email" th:value="${signupInput?.email}">
+            </div>
+            <div>
+                <!-- Input pentru parola -->
+                <label for="newPassword">Password:</label>
+                <input type="password" id="newPassword" name="password">
+            </div>
+            <!-- Buton pentru trimiterea formularului -->
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

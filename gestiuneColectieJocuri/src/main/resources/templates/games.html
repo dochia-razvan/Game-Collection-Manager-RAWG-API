@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"> <!-- Declararea documentului HTML si utilizarea namespace-ului Thymeleaf -->
+<head>
+    <meta charset="UTF-8">
+    <title>Your Game Collection</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script defer src="/scripts.js"></script>
+</head>
+<body>
+<!-- Includerea unui header predefinit folosind fragmentul Thymeleaf -->
+<div th:replace="~{fragments/header.html}"></div>
+
+<!-- Sectiune pentru adaugarea unui joc -->
+<div class="secondary-header">
+    <button id="addGameBtn" class="header-action-btn">Add Game</button>
+</div>
+
+<h1 class="page-title">Your Game Collection</h1> <!-- Titlul principal al paginii -->
+
+<!-- Tabel pentru colectia de jocuri -->
+<section class="games-section">
+    <table class="game-table">
+        <thead>
+        <tr>
+            <th class="favorite-column">F</th>
+            <th>Game Image</th>
+            <th>Game Title</th>
+            <th>Preferred Store</th>
+            <th>Hours Played</th>
+            <th>Completion Status</th>
+            <th>Completion %</th>
+            <th>Personal Rating</th>
+            <th>Actions</th>
+            <th class="delete-column">D</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Iterarea jocurilor utilizatorului folosind Thymeleaf -->
+        <tr th:each="userGame : ${games}">
+            <td class="favorite-column">
+                <img th:src="${userGame.favorite ? '/photos/filled-star.png' : '/photos/empty-star.png'}"
+                     th:attr="data-id=${userGame.id}"
+                     class="favorite-icon"
+                     onclick="toggleFavorite(this)"
+                     alt="Favorite Icon">
+            </td> <!-- Schimbarea statusului favorit si schimbarea imaginii in functie de statusul jocului -->
+            <td>
+                <img th:src="${userGame.game.image}" alt="Game Image" class="game-photo">
+            </td>
+
+            <td>
+                <span th:text="${userGame.game.title != null ? userGame.game.title : 'N/A'}">Game Title</span>
+                <br>
+                <small th:text="|(${userGame.game.releaseYear != null ? userGame.game.releaseYear : 'N/A'})|"></small> <!-- Afisarea anului de lansare -->
+            </td>
+
+            <td>
+                <span th:if="${userGame.availableStores != null && userGame.availableStores.size() > 1}">
+                    <!-- Dropdown pentru selectarea magazinului -->
+                    <!-- Logica pentru atunci cand exista mai multe magazine valabile -->
+                    <select class="editable-input" disabled>
+                        <option value="N/A" th:if="${userGame.stores == null || userGame.stores.equals('N/A')}" selected>
+                            Not Selected
+                        </option>
+                        <!-- Iterarea magazinelor disponibile -->
+                        <option th:each="store : ${userGame.availableStores}"
+                                th:value="${store}"
+                                th:text="${store}"
+                                th:selected="${store.trim().equals(userGame.stores.trim())}">
+                        </option>
+                    </select>
+                    <img src="/photos/edit-icon.png" alt="Edit" class="edit-icon" onclick="enableEdit(this)">
+                    <button class="save-btn hidden"
+                            th:attr="onclick='saveEdit(this, \'Preferred Store\', ' + ${userGame.id} + ')'">Save</button>
+                </span>
+                <!-- Logica pentru atunci cand exista un singur magazin valabil -->
+                <span th:if="${userGame.availableStores != null && userGame.availableStores.size() == 1 && userGame.availableStores[0].trim() != ''}">
+                <span th:text="${userGame.availableStores[0]}"></span>
+                </span>
+                <!-- Logica pentru atunci cand nu exista vreun magazin valabil -->
+                <span th:if="${userGame.availableStores == null || userGame.availableStores.isEmpty() || userGame.availableStores[0].trim() == ''}">
+                    No stores found.
+                </span>
+            </td>
+
+
+            <td>
+                <input type="number" th:value="${userGame.hoursPlayed != null ? userGame.hoursPlayed : 0}"
+                       class="editable-input" disabled>
+                <img src="/photos/edit-icon.png" alt="Edit" class="edit-icon" onclick="enableEdit(this)">
+                <button class="save-btn hidden"
+                        th:attr="onclick='saveEdit(this, \'Hours Played\', ' + ${userGame.id} + ')'">Save
+                </button>
+            </td>
+
+            <td>
+                <select th:value="${userGame.completionStatus}" class="editable-input" disabled>
+                    <option value="Not Started" th:selected="${userGame.completionStatus == 'Not Started'}">Not
+                        Started
+                    </option>
+                    <option value="In Progress" th:selected="${userGame.completionStatus == 'In Progress'}">In
+                        Progress
+                    </option>
+                    <option value="Completed" th:selected="${userGame.completionStatus == 'Completed'}">Completed
+                    </option>
+                </select>
+                <img src="/photos/edit-icon.png" alt="Edit" class="edit-icon" onclick="enableEdit(this)">
+                <button class="save-btn hidden"
+                        th:attr="onclick='saveEdit(this, \'Completion Status\', ' + ${userGame.id} + ')'">Save
+                </button>
+            </td>
+
+
+            <td>
+                <span th:if="${userGame.game.achievementsCount > 0}"
+                      th:text="${#numbers.formatDecimal((100.0 * userGame.userAchievementsCount) / userGame.game.achievementsCount, 2, 2)} + '%'">
+                    Completion Percentage
+                </span>
+                <span th:if="${userGame.game.achievementsCount == 0}">No achievements for this game</span>
+            </td>
+
+
+            <td>
+                <div class="rating-container">
+                    <input type="number" step="0.1"
+                           th:value="${userGame.personalRating != null ? userGame.personalRating : 0}"
+                           min="0" max="10" class="editable-input" disabled>
+                    <span>/10</span>
+                    <img src="/photos/edit-icon.png" alt="Edit" class="edit-icon" onclick="enableEdit(this)">
+                    <button class="save-btn hidden"
+                            th:attr="onclick='saveEdit(this, \'Personal Rating\', ' + ${userGame.id} + ')'">Save
+                    </button>
+                </div>
+            </td>
+
+
+            <td>
+                <a th:href="@{'/games/details/' + ${userGame.game.id}}" class="details-btn">View More Details</a>
+            </td>
+            <td class="delete-column">
+                <img src="/photos/trash-icon.png" alt="Delete" class="trash-icon"
+                     th:data-title="${userGame.game.title}"
+                     th:data-id="${userGame.id}"
+                     onclick="handleDeleteClick(this)"/>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- Modal pentru adaugarea unui joc -->
+<div id="addGameModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeAddGame">&times;</span>
+        <h2>Search for a Game</h2>
+        <input type="text" id="searchGameInput" placeholder="Enter game name" oninput="searchGames()"
+               style="width: 80%; margin-bottom: 20px;" autocomplete="off">
+        <div id="searchResults" class="search-results"></div> <!-- Rezultatele cautarii -->
+    </div>
+</div>
+
+<!-- Modal pentru stergerea unui joc -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h2 id="deleteModalTitle">Delete Game</h2>
+        <p id="deleteModalMessage">Are you sure you want to delete the game "(game name)" from your collection?</p>
+        <div class="modal-buttons">
+            <button id="confirmDeleteBtn" class="confirm-btn">Yes</button>
+            <button id="cancelDeleteBtn" class="cancel-btn">No</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
